@@ -15,53 +15,41 @@ use std::ops::Deref;
 //
 // https://save-buffer.github.io/ultrapack.html
 
-// Hack to get around rust not allowing const (BUNDLE_SIZE, BITS_PER_BUNDLE): (u8, u8) = find_optimal_bundle(..)
-pub const fn find_optimal_bundle_size(max_value: u64) -> BundleSize {
-    let (bundle_size, _) = find_optimal_bundle(max_value);
-    bundle_size
-}
-
-pub const fn find_optimal_bits_per_bundle(max_value: u64) -> BitsPerBundle {
-    let (_, bits_per_bundle) = find_optimal_bundle(max_value);
-    bits_per_bundle
-}
-
-pub const fn find_optimal_bundle(max_value: u64) -> (BundleSize, BitsPerBundle) {
+pub const fn optimal_bundle_size(max_value: u64) -> BundleSize {
     let naive_bits = if max_value == 0 {
-        0
+        return BundleSize(0);
     } else {
         max_value.ilog2() + 1
     };
 
-    let mut best_k = 1u8;
+    let mut best_size = 1u8;
     let mut best_bits_per_val = naive_bits as f64;
 
-    // Test bundle sizes up to where the bundle would overflow u64
-    let mut k = 1;
-    while k <= 40u8 {
-        // max_bundle_val = max_value^k - 1
-        let Some(max_bundle) = max_value.checked_pow(k as u32) else {
+    // test bundle sizes until we overflow u64
+    let mut bundle_size = 1;
+    while bundle_size <= 40u8 {
+        // max_value^k - 1
+        let Some(max_bundle) = max_value.checked_pow(bundle_size as u32) else {
             break;
         };
-        if max_bundle == 0 {
-            break;
-        }
 
         let bits_needed = (64 - (max_bundle - 1).leading_zeros()) as u8;
-        let bits_per_val = bits_needed as f64 / k as f64;
+        let bits_per_val = bits_needed as f64 / bundle_size as f64;
 
         if bits_per_val < best_bits_per_val {
             best_bits_per_val = bits_per_val;
-            best_k = k;
+            best_size = bundle_size;
         }
 
-        k += 1;
+        bundle_size += 1;
     }
 
-    let max_bundle = max_value.pow(best_k as u32);
-    let bits_per_bundle = (64 - (max_bundle - 1).leading_zeros()) as u8;
+    BundleSize(best_size)
+}
 
-    (BundleSize(best_k), BitsPerBundle(bits_per_bundle))
+pub const fn bits_per_bundle(max_value: u64, bundle_size: BundleSize) -> BitsPerBundle {
+    let max_bundle = max_value.pow(bundle_size.0 as u32);
+    BitsPerBundle((64 - (max_bundle - 1).leading_zeros()) as u8)
 }
 
 #[derive(Copy, Clone, Debug)]
