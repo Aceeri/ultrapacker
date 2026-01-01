@@ -1,0 +1,15 @@
+[package]
+name = "ultrapacker"
+version = "0.1.0"
+description = "Ultrapacker implementation in Rust"
+authors = ["Connor McCluskey <conmcclusk@gmail.com>"]
+edition = "2024"
+exclude = ["assets/", ".github/"]
+keywords = ["bitpacking", "compression", "optimization"]
+repository = "https://github.com/aceeri/ultrapacker"
+documentation = "https://docs.rs/ultrapacker"
+license = "MIT OR Apache-2.0"
+rust-version = "1.88.0"
+readme = "README.md"
+
+[dependencies]
