@@ -14,6 +14,8 @@ array: x + y * 18 + z * 18 * 18 gives you a range of 0-5832, which only requires
 Later I found this: `https://save-buffer.github.io/ultrapack.html`
 Which is basically an abstraction of that concept for values that all have the same possible values.
 
+This might also be called radix encoding or factoradic representation?
+
 # Limitations
 This doesn't currently let you use different possible values for each value in the bundle. Ideally you should
 able to send something like [18, 18, 18, 59] so the values have 3 with 18 possible values and 1 with 59.
